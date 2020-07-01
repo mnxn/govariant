@@ -2,6 +2,12 @@
 
 Generate variants/sum types/discriminated unions for Go
 
+## Installation
+
+```
+go get github.com/mnxn/govariant
+```
+
 ## Flags
 
 | Flag       | Description                                                    |
