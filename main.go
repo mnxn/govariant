@@ -49,6 +49,7 @@ func main() {
 		check(err)
 		_, err = file.Write(sourceCode)
 		check(err)
-		file.Close()
+		err = file.Close()
+		check(err)
 	}
 }
