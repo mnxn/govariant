@@ -123,17 +123,17 @@ func variantFromInterface(
 	// deleting in loop body, so iterate backwards
 	for i := interfaceType.Methods.NumFields() - 1; i >= 0; i-- {
 		field := interfaceType.Methods.List[i]
-		// filter out type constructors
-		isTypeConstructor, err := isTypeConstructor(field, fset)
+		// filter out constructors
+		isConstructor, err := isConstructor(field, fset)
 		if err != nil {
 			return variant{}, err
 		}
-		if isTypeConstructor {
-			// delete type constructors from interface method list
+		if isConstructor {
+			// delete constructors from interface method list
 			interfaceType.Methods.List = append(
 				interfaceType.Methods.List[:i],
 				interfaceType.Methods.List[i+1:]...)
-			// add named type constructor to variant constructors
+			// add named constructor to variant constructors
 			result.Constructors = append(result.Constructors, constructor{
 				Name:       field.Names[0].Name,
 				Parameters: parametersFromFuncType(field.Type.(*ast.FuncType)),
@@ -141,9 +141,9 @@ func variantFromInterface(
 		}
 		field.Comment, field.Doc = nil, nil
 	}
-	// must have at least one type constructor
+	// must have at least one constructor
 	if len(result.Constructors) == 0 {
-		return variant{}, parseError("must have at least one type constructor", interfaceType.Pos(), fset)
+		return variant{}, parseError("must have at least one constructor", interfaceType.Pos(), fset)
 	}
 	// reverse constructor list to match actual order
 	for i, j := 0, len(result.Constructors)-1; i < j; i, j = i+1, j-1 {
@@ -163,8 +163,8 @@ func variantFromInterface(
 	return result, nil
 }
 
-// isTypeConstructor checks whether an interface method can be used as a type constructor
-func isTypeConstructor(field *ast.Field, fset *token.FileSet) (bool, error) {
+// isConstructor checks whether an interface method can be used as a constructor
+func isConstructor(field *ast.Field, fset *token.FileSet) (bool, error) {
 	// check for methods which are annotated with @method
 	if field.Comment != nil && field.Comment.List != nil {
 		commentFields := strings.Fields(field.Comment.List[0].Text)
@@ -183,32 +183,32 @@ func isTypeConstructor(field *ast.Field, fset *token.FileSet) (bool, error) {
 
 	// must be void function
 	if funcType.Results != nil {
-		return false, parseError("cannot have a return type on a type constructor", funcType.Results.Pos(), fset)
+		return false, parseError("cannot have a return type on a constructor", funcType.Results.Pos(), fset)
 	}
 
 	for _, param := range funcType.Params.List {
-		// no variadic parameters in type constructor
+		// no variadic parameters in constructor
 		if _, ok := param.Type.(*ast.Ellipsis); ok {
-			return false, parseError("cannot have variadic type constructor", param.Pos(), fset)
+			return false, parseError("cannot have variadic constructor", param.Pos(), fset)
 		}
 		if len(param.Names) == 0 {
 			// cannot have unnamed interface types
 			if _, ok := param.Type.(*ast.InterfaceType); ok {
-				return false, parseError("cannot have an unnamed interface type in type constructor", param.Pos(), fset)
+				return false, parseError("cannot have an unnamed interface type in constructor", param.Pos(), fset)
 			}
 			// cannot have unnamed pointer types
 			if _, ok := param.Type.(*ast.StarExpr); ok {
-				return false, parseError("cannot have an unnamed pointer type in type constructor", param.Pos(), fset)
+				return false, parseError("cannot have an unnamed pointer type in constructor", param.Pos(), fset)
 			}
 		}
 		if funcType.Params.NumFields() > 1 {
-			// type constructor may only have a single unnamed parameter
+			// constructor may only have a single unnamed parameter
 			if len(param.Names) == 0 {
-				return false, parseError("cannot have multiple unnamed parameters in a type constructor", param.Pos(), fset)
+				return false, parseError("cannot have multiple unnamed parameters in a constructor", param.Pos(), fset)
 			}
-			// if there is more than one parameter to the type constructor, they must be named
+			// if there is more than one parameter to the constructor, they must be named
 			if len(param.Names) > 1 {
-				return false, parseError("cannot use a name list as parameters in a type constructor", param.Pos(), fset)
+				return false, parseError("cannot use a name list as parameters in a constructor", param.Pos(), fset)
 			}
 		}
 	}

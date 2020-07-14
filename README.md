@@ -28,7 +28,7 @@ type _ interface {
 }
 ```
 
-Each interface method acts as a type constructor for the variant.
+Each interface method acts as a constructor for the variant.
 
 With all generation options disabled it will generate the following in `option_variant.go`:
 
@@ -47,15 +47,15 @@ func (Some) isOption() {}
 func (None) isOption() {}
 ```
 
-The underlying type of the generated types depends on the parameters of the type constructors.
+The underlying type of the generated types depends on the parameters of the constructors.
 
-| Source Type Constructor | Generated Type            |
-| ----------------------- | ------------------------- |
-| `A()`                   | `type A struct {}`        |
-| `B(int)`                | `type B int`              |
-| `C(x int)`              | `type C struct { x int }` |
+| Source Constructor | Generated Type            |
+| ------------------ | ------------------------- |
+| `A()`              | `type A struct {}`        |
+| `B(int)`           | `type B int`              |
+| `C(x int)`         | `type C struct { x int }` |
 
-Add a method that is required for all type constructors with `@method`:
+Add a method that is required for all constructors with `@method`:
 
 ```go
 // @variant Option
@@ -85,7 +85,7 @@ var (
 )
 ```
 
-If the type constructors don't implement the specified method, there will be an build error because of the checks:
+If the constructors don't implement the specified method, there will be an build error because of the checks:
 
 ```
 .\option_variant.go:33:2: cannot use struct { Some } literal (type struct { Some }) as type Option in assignment:
