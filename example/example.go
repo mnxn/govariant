@@ -21,9 +21,11 @@ type _ interface {
 func (s Square) String() string {
 	return fmt.Sprintf("Square with length %f", s.length)
 }
+
 func (r Rectangle) String() string {
 	return fmt.Sprintf("Rectangle with length %f and width %f", r.length, r.width)
 }
+
 func (c Circle) String() string {
 	return fmt.Sprintf("Circle with radius %f", c.radius)
 }
@@ -35,15 +37,15 @@ func main() {
 
 	// using type switch to distinguish variants
 	var area float64
-	switch shape.(type) {
+	switch s := shape.(type) {
 	case Square:
-		length := shape.(Square).Unpack()
+		length := s.Unpack()
 		area = length * length
 	case Rectangle:
-		length, width := shape.(Rectangle).Unpack()
+		length, width := s.Unpack()
 		area = length * width
 	case Circle:
-		radius := shape.(Circle).Unpack()
+		radius := s.Unpack()
 		area = math.Pi * radius * radius
 	}
 	fmt.Println("Area", area) // Area 15

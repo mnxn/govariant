@@ -106,9 +106,9 @@ The `Unpack` method for an empty type isn't particularly useful, but it's provid
 They can be used from a type switch like so:
 
 ```go
-switch option.(type) {
+switch o := option.(type) {
 case Some:
-	value := option.(Some).Unpack()
+	value := o.Unpack()
 	fmt.Println("Value is", value)
 case None:
 	fmt.Println("No value")
